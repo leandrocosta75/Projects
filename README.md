@@ -14,3 +14,6 @@ This is a simple project of the classic Battleship game, developed as a programm
 
 - Language: C++  
 - Compiler: GCC / CodeBlocks / Visual Studio Code  
+
+## 📝 NOTES
+- All comments in the code are written in portuguese
