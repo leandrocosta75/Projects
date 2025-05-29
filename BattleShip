@@ -1,1 +1,428 @@
+#include <iostream>
+#include <limits>
+#include <conio.h>
+#include <iostream>
+
+
+// C�digos ANSI para as cores
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
+#define RESET "\033[0m"
+#define GRAY "\033[1;30m"
+#define BLUE "\033[1;34m"
+
+
+using namespace std;
+
+
+    //MENU DO JOGO
+    void Menu(){
+        cout << "Selecione a Opcao:" << endl;
+        cout << "1---Novo Jogo" << endl;
+        cout << "2---Instrucoes" << endl;
+        cout << "3---Creditos" << endl;
+        cout << "4---Sair do Jogo" << endl;
+    }
+
+
+
+    // INICIALIZAR AS MATRIZES
+    const int tamanho = 10;
+    void inicializarTabuleiros(char jogador1[tamanho][tamanho], char jogador2[tamanho][tamanho]) {
+        for(int i = 0; i < tamanho; i++){
+            for(int j = 0; j < tamanho; j++){
+                jogador1[i][j] = '~';
+                jogador2[i][j] = '~';
+            }
+        }
+    }
+
+
+
+    // PRINT DAS MATRIZES
+    void imprimirTabuleiro(char jogador[tamanho][tamanho], const string nomeJogador) {
+        cout << "Tabuleiro do " << nomeJogador << ":" << endl;
+
+        cout << " ";
+            for(int i = 0;i< tamanho; i++) {
+                cout << " " << i;     // Para as coordenadas das colunas em cima
+            }
+            cout << endl;
+
+            for(int i = 0; i < tamanho; i++){
+                cout << i << " ";   // Para as coordenas das linhas � esquerda
+            for(int j = 0; j < tamanho; j++){
+                cout << jogador[i][j] << " "; // D� espa�os na matriz
+            }
+            cout << endl;
+            }
+    }
+
+
+
+    void ignorar_entradas(){
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignora entradas numericas em strings e vice-versa
+    }
+
+
+
+    bool posicaoValida(char jogador[tamanho][tamanho], int linha, int coluna, int tamanho_barco, char direcao) {
+
+        // Verifica se a posi��o � v�lida para posicionar um barco na horizontal
+        if (direcao == 'H' || direcao == 'h') {
+            for (int j = coluna; j < coluna + tamanho_barco; j++) {
+                if (j >= tamanho || jogador[linha][j] != '~') {
+                    system("cls");
+                    cout << "Coordenadas invalidas!\nDigite novamente:\n" << endl;
+                    return false; // Existe sobreposi��o ou est� fora dos limites
+                }
+            }
+        }
+
+        // Verifica se a posi��o � v�lida para posicionar um barco na horizontal
+        else if (direcao == 'V' || direcao == 'v') {
+            for (int i = linha; i < linha + tamanho_barco; i++) {
+                if (i >= tamanho || jogador[i][coluna] != '~') {
+                    system("cls");
+                    cout << "Coordenadas invalidas!\nDigite novamente:\n" << endl;
+                    return false; // Existe sobreposi��o ou est� fora dos limites
+                }
+            }
+        }
+        else if (linha < tamanho - tamanho || linha > tamanho - 1 || coluna < tamanho - tamanho || coluna > tamanho - 1 || direcao != 'H' || direcao != 'h' || direcao != 'V' || direcao != 'v'){
+            system("cls");
+            cout << "Coordenadas ivalidas!\nDigite novamente:\n" << endl;
+            return false;    // Volta a perguntar as coordenadas caso elas estejam fora dos limites
+        }
+        system("cls");
+        return true;  // Caso n�o haja nenhum erro ele continua o c�digo
+    }
+
+
+
+    const int tamanho_barco[] = {5,4,3,3,2};        // Tamanho dos barcos
+    int tamanho_do_vetor = sizeof(tamanho_barco) / sizeof(tamanho_barco[0]);   // Comprimento do vector
+    const char letra_barco[] = {'A','B','C','D','E'} ;   // Letras correspondentes aos tamanhos dos barcos
+
+
+    // POSICIONAMENTE DOS BARCOS
+    void posicionarBarco(char jogador[tamanho][tamanho],int tamanho_barco, const string nomeJogador, char letra_barco){
+        int linha, coluna;
+        char direcao;
+
+        do {
+            imprimirTabuleiro(jogador, nomeJogador);
+            cout << nomeJogador << ", introduza a linha para colocar o barco de tamanho " << tamanho_barco << ": ";
+            cin >> linha;
+            cout << nomeJogador << ", introduza a coluna para colocar o barco de tamanho " << tamanho_barco << ": ";
+            cin >> coluna;
+            cout << nomeJogador << ", introduza a direcao (H / h para horizontal, V / v para vertical): ";
+            cin >> direcao;
+
+            ignorar_entradas();
+
+        }while (!posicaoValida(jogador, linha, coluna, tamanho_barco, direcao));   // While para que apenas continue caso as vari�veis estejam preenchidas com valores v�lidos
+
+
+        if (direcao == 'H' || direcao == 'h'){
+            for(int j = coluna; j < coluna + tamanho_barco;j++) {
+            jogador[linha][j] = letra_barco;
+            }
+        }
+        else if (direcao == 'V' || direcao == 'v') {
+            for(int i=linha; i < linha + tamanho_barco; i++){
+            jogador[i][coluna] = letra_barco;
+            }
+        }
+    }
+
+
+
+    // Fun��o para posicionar todos os barcos
+    void posicionarTodosBarco(char jogador[tamanho][tamanho], const string nomeJogador){
+        for(int i=0;i<tamanho_do_vetor;i++){
+            posicionarBarco(jogador, tamanho_barco[i], nomeJogador, letra_barco[i]);
+            system("cls");       // Apaga tudo que estiver para tr�s
+        }
+    }
+
+
+
+    // Fun��o para verificar se todos os barcos foram afundados
+    bool todosBarcosAfundados(char jogador[tamanho][tamanho]) {
+        for(int k=0; k < tamanho_do_vetor;k++){
+            for (int i = 0; i < tamanho; i++) {
+                for (int j = 0; j < tamanho; j++) {
+                    if (jogador[i][j] == letra_barco[k]) {
+                        return false; // Ainda h� um barco n�o afundado, logo retorna false
+                    }
+                }
+            }
+        }
+    return true;  // Se n�o der return false anteriormente quer dizir que j� n�o existem barcos no tabuleiro logo retorna true e o jogo ir� acabar
+    }
+
+
+
+    // Fun��o para realizar um ataque
+    bool realizarAtaque(char jogadorAtacado[tamanho][tamanho], int linha, int coluna, string nomeJogador){
+        for(int i=0;i<tamanho_do_vetor;i++){
+            if (jogadorAtacado[linha][coluna] == letra_barco[i]){
+                jogadorAtacado[linha][coluna] = 'X'; // Caso acerte em qualquer um dos barcos o ataque ser� com sucesso
+                return true;  // Ataque com sucesso
+            }
+        }
+        if (todosBarcosAfundados(jogadorAtacado)) {
+            cout << nomeJogador << YELLOW << " Afundaste todos os barcos do teu advers�rio!\n" << RESET << endl;
+        }
+        if(jogadorAtacado[linha][coluna] == 'X'){   // Caso ataque onde j� atacou vai falhar pois mesmo que tivesse acertado antes agora j� n�o h� l� nada
+            jogadorAtacado[linha][coluna] = 'X';
+            return false;  // Ataque sem sucesso
+        }
+        if(jogadorAtacado[linha][coluna] == '~'){   // Caso acerte na �gua o ataque ser� sem sucesso
+            jogadorAtacado[linha][coluna] = 'O';
+            return false;  // Ataque sem sucesso
+        }
+        if(jogadorAtacado[linha][coluna] == 'O'){   // Caso acerte na �gua ( que j� tinha acertado antes) tamb�m ser� um ataque sem sucesso
+            jogadorAtacado[linha][coluna] = 'O';
+            return false; // Ataque sem sucesso
+        }
+        return true; // O jogo acaba pois todos os barcos foram afundados
+    }
+
+
+
+    // Fun��o para verificar o afundamento dos barcos individualmente
+    void verificarAfundamentoSolo(char jogadorAtacado[tamanho][tamanho]) {
+        for (int i = 0; i < tamanho_do_vetor; i++) {
+            char letra_barco1 = letra_barco[i];  // Obt�m a letra do barco atual
+
+            bool barcoDestruido = true;   // Inicializa��o de um booleano em true
+
+            for (int linha = 0; linha < tamanho; linha++) {
+                for (int coluna = 0; coluna < tamanho; coluna++) {
+                    if (jogadorAtacado[linha][coluna] == letra_barco1) {
+                        // Encontrou uma parte do barco que n�o foi destru�da
+                        barcoDestruido = false;  // Retorna false caso ainda exista uma parte do barco n�o destru�da
+                        break;
+                    }
+                }
+            }
+
+        if (barcoDestruido) {   // Caso volte true ( ou seja ainda j� n�o existe qualquer parte do barco) , ent�o quer dizer que ele foi destru�do
+            cout << BLUE << "O barco de tamanho " << tamanho_barco[i] << " esta destru�do!" << RESET<< endl;
+        }
+        }
+    }
+
+
+
+    // Continua o programa depois do utilizador digitar uma qualquer letra e limpa tudo mostrado anteriormente
+    void digitarqualquertecla(){
+        cout << "Pressione qualquer tecla para continuar." << endl;
+        char tecla = _getch();
+        ignorar_entradas();
+        system("cls");
+    }
+
+
+    void comecar_a_jogar(){
+
+        system("cls");
+
+
+            //ESCOLHA DE NOMES DOS JOGADORES
+            string nomeJogador1, nomeJogador2;
+
+
+            cout << "Introduza o nome do Jogador 1: " << endl;
+            cin >> nomeJogador1;    // O jogador 1 escolhe o seu nome
+            cout << "Introduza o nome do Jogador 2: " << endl;
+            cin >> nomeJogador2;    // O jogador 2 escolhe o seu nome
+
+
+            //LIGACAO DOS TABULEIROS COM OS NOMES
+            char jogador1[tamanho][tamanho];
+            char jogador2[tamanho][tamanho];
+
+            inicializarTabuleiros(jogador1, jogador2);      // Inicializa��o dos tabuleiros
+
+
+            posicionarTodosBarco(jogador1, nomeJogador1);   // Posicionamento de todos os barcos do Jogador 1
+            posicionarTodosBarco(jogador2, nomeJogador2);   // Posicionamento de todos os barcos do Jogador 2
+
+
+            while (true) {
+            cout << "Vez do jogador: " << nomeJogador1 << endl;
+            imprimirTabuleiro(jogador1, nomeJogador1);
+
+            int linha, coluna;
+
+
+            do {
+            cout << RED << "Introduza a linha para o ataque: " << RESET;
+            cin >> linha;   // O jogador digita a linha em que deseja atacar
+
+            if (cin.fail() || linha < 0 || linha >= tamanho) {
+                cout << "Entrada invalida para a linha! Tente novamente." << endl;
+                ignorar_entradas();
+                continue; // Volta ao in�cio do loop
+            }
+
+            cout << RED << "Introduza a coluna para o ataque: " << RESET;  // O jogador digita a coluna em que deseja atacar
+            cin >> coluna;
+
+            if (cin.fail() || coluna < 0 || coluna >= tamanho) {
+                cout << "Entrada invalida para a coluna! Tente novamente." << endl;
+                ignorar_entradas() ;
+            }
+            else {
+                // Sai do loop se as coordenadas forem v�lidas
+                break;
+            }
+            } while (true);  // Loop at� que as entradas sejam v�lidas
+
+            // Realizar ataque
+            bool ataqueBemSucedido = realizarAtaque(jogador2, linha, coluna, nomeJogador1);
+
+            if (ataqueBemSucedido) {
+                cout << GREEN << "Ataque bem-sucedido!\n" << RESET << endl;
+                verificarAfundamentoSolo(jogador2);
+            }
+
+            if(todosBarcosAfundados(jogador2)) {   // S� � true se todos os barcos forem destruidos
+                system("cls");
+                cout << YELLOW <<  nomeJogador1 << " Venceu! Pois afundou todos os barcos!\n" << endl;
+                cout << "Muito Obrigado por jogar!\n" << RESET << endl;
+
+                digitarqualquertecla();
+                break;   // Caso o jogador destrua todos os barcos ganha o jogo
+            }
+            if(!ataqueBemSucedido) {
+                cout << GRAY << "Ataque sem sucesso!\n" << RESET;
+            }
+
+            // Troca de jogadores
+
+            digitarqualquertecla();
+            system("cls");
+            swap(jogador1, jogador2);            // Troca o tabuleiro
+            swap(nomeJogador1, nomeJogador2);    // Troca o nome do Jogador
+            }
+    }
+
+
+
+
+
+int main()
+{
+    //ESCOLHA DA OPCAO E REPETICAO DO MENU ENQUANTO NAO HOUVER UMA OPCAO V�LIDA
+    int opcao = 0;
+    char tecla;
+    cout << "Bem vindo ao Jogo Batalha Naval!\n" << endl;
+
+    do {
+        Menu();
+        cin >> opcao;
+        ignorar_entradas();
+
+    switch(opcao){
+
+        case 1: {
+
+            comecar_a_jogar();
+
+            break;
+
+        }
+
+
+        case 2: {
+
+            // Instru��es do Jogo
+            system("cls");
+
+
+            cout << RED << "Como atacar:\n" << endl;
+
+            cout << "    No ataque vai ser pedido ao Jogador que selecione a Linha e a Coluna na qual pretende fazer o seu ataque." << endl;
+            cout << "    Caso acerte esse ataque aparecera uma mensagem de aviso e o jogo continuara para o proximo Jogador apos um pressionamento de qualquer tecla, o mesmo acontecera para caso falhe o ataque." << endl;
+            cout << "    Dica: Se atacar onde ja atacou o ataque sera considerado como sem-sucesso!\n" << endl;
+
+
+
+            cout << GREEN << "Posicionamento de Barcos:\n" << endl;
+
+            cout << "    Ao escolher as coordenadas, caso escolha Horizontalmente, o barco sera colocado do ponto de cruzamento entre a linha e a coluna, independentemente do tamanho do barco ira ser colocado da direita para a esquerda." << endl;
+            cout << "    Caso escolhe Verticalmente o barco ira ser colocado de cima para baixo a partir do ponto de cruzamento entre a linha e a coluna." <<  endl;
+            cout << "    Caso a coloca��o do barco interfira com um ja posto ou sair dos limites do tabuleiro ira dar erro!\n" << endl;
+
+
+
+            cout << YELLOW << "Como ganhar:\n" << endl;
+
+            cout << "Para ganhar o jogo basta destruir todos os barcos do outro jogador.\n" << RESET << endl;
+
+
+
+            cout << "Introduza 1 para voltar ao Menu Principal." << endl;
+
+            cin >> opcao;
+            ignorar_entradas();
+            system("cls");
+
+
+            if (opcao !=1){
+                do{
+
+                system("cls");
+                cout << "Introduza 1 para voltar ao Menu Principal!" << endl;
+                cin >> opcao;
+                ignorar_entradas();
+
+                }while (opcao != 1);
+
+            }
+        break;
+        }
+
+        case 3: {
+
+            // Cr�ditos do Jogo
+            system("cls");
+            cout << BLUE << "     Este jogo foi realizado por Leandro Pereira da Costa,\nem seguimento do Trabalho Pratico :" << RESET << RED << " Batalha Naval\n" << RESET << endl;
+            cout << "Digite 1 para voltar ao Menu Principal." << endl;
+            cin >> opcao;
+            ignorar_entradas();
+            system("cls");
+
+            if (opcao !=1){
+                do{
+                system("cls");
+                cout << "Digite 1 para voltar ao Menu Principal!" << endl;
+                cin >> opcao;
+                ignorar_entradas();
+                }while (opcao != 1);
+            }
+        break;
+        }
+
+        case 4: {
+
+            // Caso o utilizador saia do Jogo
+            system("cls");
+            cout << "Obrigado por jogar!" << endl;
+        break;
+        }
+        default:
+            system("cls");
+            cout << "Entrada invalida. Tente novamente:" << endl;
+    }
+    }while (opcao != 4);   //Um loop para que apenas o Jogo feche quando selecionada a op��o 4
+}
+
+
 
